@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>INK & SHADOW — Tattoo Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8C97E;
+      --gold-dim: #7a5f28;
+      --black: #080808;
+      --dark: #0f0f0f;
+      --dark2: #161616;
+      --dark3: #1e1e1e;
+      --white: #f0ece4;
+      --gray: #666;
+      --light-gray: #aaa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* NOISE TEXTURE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 60px;
+      background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      letter-spacing: 0.3em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--light-gray);
+      text-decoration: none;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+
+    .nav-cta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--black);
+      background: var(--gold);
+      padding: 10px 24px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .nav-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 0 60px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 70% 50%, rgba(201,168,76,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 60%),
+        var(--black);
+    }
+
+    .hero-line {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      width: 55%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+      transform: translateY(-60px);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(3rem, 6vw, 6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: var(--white);
+      animation: fadeUp 0.9s 0.1s ease both;
+    }
+
+    .hero-title span {
+      color: var(--gold);
+      display: block;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      font-style: italic;
+      color: var(--light-gray);
+      margin-top: 24px;
+      max-width: 440px;
+      line-height: 1.6;
+      animation: fadeUp 1s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 20px;
+      margin-top: 48px;
+      animation: fadeUp 1s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.3); }
+
+    .btn-outline {
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 60px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--gray);
+      text-transform: uppercase;
+      animation: fadeUp 1.2s 0.5s ease both;
+    }
+
+    .hero-scroll::before {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--gold-dim);
+    }
+
+    .hero-badge {
+      position: absolute;
+      right: 60px;
+      bottom: 60px;
+      width: 120px;
+      height: 120px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: spin 20s linear infinite;
+    }
+
+    .hero-badge-text {
+      position: absolute;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      letter-spacing: 0.3em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECTION SHARED */
+    section { padding: 120px 60px; }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.5em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      max-width: 60px;
+      height: 1px;
+      background: var(--gold-dim);
+    }
+
+    .section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    /* ABOUT */
+    .about {
+      background: var(--dark);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-image {
+      position: relative;
+    }
+
+    .about-img-frame {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--dark3);
+      border: 1px solid var(--dark3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-img-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 20px,
+          rgba(201,168,76,0.03) 20px,
+          rgba(201,168,76,0.03) 21px
+        );
+    }
+
+    .about-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--gold-dim);
+    }
+
+    .about-img-placeholder svg { opacity: 0.4; }
+
+    .about-img-placeholder span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--gray);
+    }
+
+    .about-accent {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      width: 80px;
+      height: 80px;
+      border-top: 2px solid var(--gold);
+      border-left: 2px solid var(--gold);
+    }
+
+    .about-accent-br {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-bottom: 2px solid var(--gold);
+      border-right: 2px solid var(--gold);
+    }
+
+    .about-text p {
+      font-size: 1.1rem;
+      line-height: 1.9;
+      color: var(--light-gray);
+      margin-bottom: 20px;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 1px solid var(--dark3);
+    }
+
+    .stat-num {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      display: block;
+    }
+
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--gray);
+      text-transform: uppercase;
+      margin-top: 6px;
+      display: block;
+    }
+
+    /* GALLERY */
+    .gallery { background: var(--black); }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 60px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 16px;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--dark3);
+    }
+
+    .gallery-item:nth-child(1) { grid-row: span 2; }
+    .gallery-item:nth-child(5) { grid-column: span 2; }
+
+    .gallery-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--dark2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.5s ease;
+    }
+
+    .gallery-item:nth-child(1) .gallery-img { aspect-ratio: auto; height: 100%; }
+    .gallery-item:nth-child(5) .gallery-img { aspect-ratio: 2/1; }
+
+    .gallery-img::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 15px,
+        rgba(201,168,76,0.02) 15px,
+        rgba(201,168,76,0.02) 16px
+      );
+    }
+
+    .gallery-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      z-index: 1;
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(8,8,8,0.9) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      display: flex;
+      align-items: flex-end;
+      padding: 24px;
+    }
+
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-item:hover .gallery-img { transform: scale(1.04); }
+
+    .gallery-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+      background: rgba(201,168,76,0.15);
+      padding: 6px 14px;
+      border: 1px solid var(--gold-dim);
+    }
+
+    /* INSTAGRAM */
+    .instagram {
+      background: var(--dark);
+      text-align: center;
+    }
+
+    .instagram-header { margin-bottom: 60px; }
+
+    .instagram-handle {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--gold-dim);
+      padding: 12px 28px;
+      transition: all 0.3s;
+    }
+
+    .instagram-handle:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
+
+    .instagram-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+
+    .insta-item {
+      aspect-ratio: 1;
+      background: var(--dark2);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--dark3);
+    }
+
+    .insta-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(201,168,76,0.06));
+    }
+
+    .insta-item:hover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(201,168,76,0.15);
+      border: 2px solid var(--gold);
+    }
+
+    .insta-placeholder {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .insta-icon { font-size: 2rem; color: var(--gold-dim); margin-bottom: 8px; }
+
+    /* TESTIMONIALS */
+    .testimonials {
+      background: var(--black);
+      overflow: hidden;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .testimonial-card {
+      background: var(--dark2);
+      border: 1px solid var(--dark3);
+      padding: 36px;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+
+    .testimonial-card:hover { border-color: var(--gold-dim); }
+
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 4rem;
+      color: var(--gold-dim);
+      opacity: 0.3;
+      line-height: 1;
+    }
+
+    .testimonial-text {
+      font-size: 1rem;
+      font-style: italic;
+      line-height: 1.8;
+      color: var(--light-gray);
+      margin-bottom: 24px;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--dark3);
+      border: 1px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+    }
+
+    .author-info span {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+    }
+
+    .author-name { color: var(--white); }
+    .author-meta { color: var(--gray); margin-top: 2px; }
+
+    .stars { color: var(--gold); font-size: 0.7rem; margin-bottom: 16px; }
+
+    /* BOOKING FORM */
+    .booking {
+      background: var(--dark);
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .booking-info h2 { margin-bottom: 24px; }
+
+    .booking-info p {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--light-gray);
+      margin-bottom: 40px;
+    }
+
+    .booking-details {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .booking-detail {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--gold);
+      font-size: 0.9rem;
+    }
+
+    .detail-text strong {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .detail-text span {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    /* FORM */
+    .form-card {
+      background: var(--dark2);
+      border: 1px solid var(--dark3);
+      padding: 48px;
+      position: relative;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .form-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.4rem;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .form-subtitle {
+      font-size: 0.9rem;
+      color: var(--gray);
+      font-style: italic;
+      margin-bottom: 36px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-group label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--dark3);
+      border: 1px solid #2a2a2a;
+      color: var(--white);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      padding: 14px 18px;
+      outline: none;
+      transition: border-color 0.3s;
+      appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold-dim);
+      background: #1a1a1a;
+    }
+
+    .form-group select option { background: var(--dark3); }
+
+    .form-group textarea { resize: vertical; min-height: 100px; }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--gray); }
+
+    .form-submit {
+      width: 100%;
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+
+    .form-submit:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.25);
+    }
+
+    .form-note {
+      font-size: 0.8rem;
+      color: var(--gray);
+      font-style: italic;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    /* SUCCESS MSG */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .success-msg.show { display: block; animation: fadeUp 0.5s ease; }
+
+    .success-msg .check {
+      font-size: 3rem;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .success-msg h3 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.4rem;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .success-msg p {
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--black);
+      border-top: 1px solid var(--dark3);
+      padding: 60px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .footer-logo {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.2rem;
+      color: var(--gold);
+      letter-spacing: 0.3em;
+    }
+
+    .footer-copy {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      color: var(--gray);
+      text-align: center;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--dark3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray);
+      text-decoration: none;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .social-link:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* DIVIDER */
+    .gold-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+      margin: 0 60px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 20px 24px; }
+      .nav-links, .nav-cta { display: none; }
+      section { padding: 80px 24px; }
+      .hero { padding: 0 24px; }
+      .about, .booking { grid-template-columns: 1fr; gap: 48px; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-item:nth-child(1) { grid-row: span 1; }
+      .gallery-item:nth-child(5) { grid-column: span 1; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .instagram-grid { grid-template-columns: repeat(2, 1fr); }
+      footer { grid-template-columns: 1fr; text-align: center; }
+      .footer-social { justify-content: center; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-card { padding: 32px 24px; }
+      .gold-divider { margin: 0 24px; }
+      .hero-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">INK & SHADOW</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#gallery">Portfolio</a></li>
+      <li><a href="#instagram">Instagram</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+    </ul>
+    <a href="#booking" class="nav-cta">Book Now</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-line"></div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow">✦ Est. 2016 · Custom Tattoo Art</p>
+      <h1 class="hero-title">
+        Where Skin
+        <span>Becomes Art</span>
+      </h1>
+      <p class="hero-subtitle">
+        Precision black & grey work, intricate fine lines, and bold custom designs — each piece a permanent testament to your story.
+      </p>
+      <div class="hero-actions">
+        <a href="#booking" class="btn-primary">Book a Session</a>
+        <a href="#gallery" class="btn-outline">View Portfolio</a>
+      </div>
+    </div>
+
+    <div class="hero-scroll">Scroll to explore</div>
+
+    <div class="hero-badge">
+      <div class="hero-badge-text">CUSTOM · TATTOO · STUDIO ·&nbsp;</div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="about-image">
+      <div class="about-accent"></div>
+      <div class="about-img-frame">
+        <div class="about-img-placeholder">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>Artist Photo Here</span>
+        </div>
+      </div>
+      <div class="about-accent-br"></div>
+    </div>
+
+    <div class="about-text">
+      <p class="section-label">The Artist</p>
+      <h2 class="section-title">Alex Mercer<br/>Tattoo Artist</h2>
+      <br/>
+      <p>
+        With over a decade of ink under my needle, I've crafted thousands of pieces that live on skin forever. My work bridges the gap between traditional artistry and contemporary vision.
+      </p>
+      <p>
+        Specialising in black & grey realism, geometric compositions, and dark illustrative work — every tattoo is a collaboration between artist and canvas, between concept and skin.
+      </p>
+
+      <div class="about-stats">
+        <div>
+          <span class="stat-num">1.2K+</span>
+          <span class="stat-label">Tattoos Done</span>
+        </div>
+        <div>
+          <span class="stat-num">10+</span>
+          <span class="stat-label">Years Active</span>
+        </div>
+        <div>
+          <span class="stat-num">98%</span>
+          <span class="stat-label">Client Satisfaction</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- GALLERY -->
+  <section class="gallery" id="gallery">
+    <div class="gallery-header">
+      <div>
+        <p class="section-label">Portfolio</p>
+        <h2 class="section-title">Selected Works</h2>
+      </div>
+      <a href="#booking" class="btn-outline" style="white-space:nowrap">Commission a Piece</a>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 1</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Black & Grey</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 2</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Fine Line</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 3</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Geometric</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 4</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Realism</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 5</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Illustrative</span></div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-img">
+          <div class="gallery-placeholder">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <span>Tattoo Photo 6</span>
+          </div>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-tag">Dark Art</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- INSTAGRAM -->
+  <section class="instagram" id="instagram">
+    <div class="instagram-header">
+      <p class="section-label" style="justify-content:center">Social</p>
+      <h2 class="section-title">Follow on Instagram</h2>
+      <br/>
+      <a href="https://instagram.com/YOUR_INSTAGRAM_ID" target="_blank" class="instagram-handle">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        @YOUR_INSTAGRAM_ID
+      </a>
+    </div>
+
+    <div class="instagram-grid">
+      <div class="insta-item">
+        <svg class="insta-icon" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <span class="insta-placeholder">Post 1</span>
+      </div>
+      <div class="insta-item">
+        <svg class="insta-icon" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <span class="insta-placeholder">Post 2</span>
+      </div>
+      <div class="insta-item">
+        <svg class="insta-icon" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <span class="insta-placeholder">Post 3</span>
+      </div>
+      <div class="insta-item">
+        <svg class="insta-icon" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <span class="insta-placeholder">Post 4</span>
+      </div>
+    </div>
+
+    <a href="https://instagram.com/YOUR_INSTAGRAM_ID" target="_blank" class="btn-primary">
+      View Full Feed →
+    </a>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials" id="testimonials">
+    <p class="section-label">Client Stories</p>
+    <h2 class="section-title">Words on Ink</h2>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Alex transformed my rough concept into something that far exceeded my imagination. The line work is impeccable — five months later and people still stop me on the street.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">S</div>
+          <div class="author-info">
+            <span class="author-name">Sarah M.</span>
+            <span class="author-meta">Sleeve — Black & Grey</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">Best tattoo experience of my life. The studio atmosphere, the professionalism, the precision — this isn't just ink, it's art. Already planning my next piece.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">J</div>
+          <div class="author-info">
+            <span class="author-name">James T.</span>
+            <span class="author-meta">Chest piece — Geometric</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">I came in with a terrible experience from another artist. Alex not only fixed it but turned it into a masterpiece. Couldn't recommend more highly.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">R</div>
+          <div class="author-info">
+            <span class="author-name">Riya K.</span>
+            <span class="author-meta">Cover-up — Illustrative</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- BOOKING FORM -->
+  <section class="booking" id="booking">
+    <div class="booking-info">
+      <p class="section-label">Consultations</p>
+      <h2 class="section-title">Book Your<br/>Session</h2>
+      <br/>
+      <p>Every great tattoo begins with a conversation. Fill out the form and I'll get back to you within 48 hours to discuss your vision, placement, sizing, and pricing.</p>
+
+      <div class="booking-details">
+        <div class="booking-detail">
+          <div class="detail-icon">⏱</div>
+          <div class="detail-text">
+            <strong>Response Time</strong>
+            <span>Within 48 hours</span>
+          </div>
+        </div>
+        <div class="booking-detail">
+          <div class="detail-icon">✦</div>
+          <div class="detail-text">
+            <strong>Consultation</strong>
+            <span>Free, no obligation</span>
+          </div>
+        </div>
+        <div class="booking-detail">
+          <div class="detail-icon">◈</div>
+          <div class="detail-text">
+            <strong>Deposit</strong>
+            <span>Required to secure your slot</span>
+          </div>
+        </div>
+        <div class="booking-detail">
+          <div class="detail-icon">✉</div>
+          <div class="detail-text">
+            <strong>Or DM on Instagram</strong>
+            <span>@YOUR_INSTAGRAM_ID</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div id="formContent">
+        <p class="form-title">Request a Booking</p>
+        <p class="form-subtitle">All fields marked * are required</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" id="firstName" placeholder="Your first name" />
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" id="lastName" placeholder="Your last name" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="email" placeholder="your@email.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="+91 00000 00000" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tattoo Style *</label>
+            <select id="style">
+              <option value="" disabled selected>Select style</option>
+              <option>Black & Grey</option>
+              <option>Fine Line</option>
+              <option>Geometric</option>
+              <option>Realism</option>
+              <option>Illustrative</option>
+              <option>Dark / Horror</option>
+              <option>Cover-up</option>
+              <option>Other / Unsure</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Placement *</label>
+            <select id="placement">
+              <option value="" disabled selected>Select area</option>
+              <option>Arm / Sleeve</option>
+              <option>Leg</option>
+              <option>Back</option>
+              <option>Chest</option>
+              <option>Neck</option>
+              <option>Rib</option>
+              <option>Hand / Fingers</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Approximate Size</label>
+          <select id="size">
+            <option value="" disabled selected>Select size</option>
+            <option>Small (under 3 inches)</option>
+            <option>Medium (3–6 inches)</option>
+            <option>Large (6–10 inches)</option>
+            <option>Extra Large / Full piece</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Describe Your Idea *</label>
+          <textarea id="description" placeholder="Tell me about your tattoo idea — themes, references, inspiration, colours, mood..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>How Did You Find Me?</label>
+          <select id="source">
+            <option value="" disabled selected>Select one</option>
+            <option>Instagram</option>
+            <option>Word of mouth</option>
+            <option>Google</option>
+            <option>Walk-in</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <button class="form-submit" onclick="submitForm()">Send Booking Request ✦</button>
+        <p class="form-note">Your information is kept private and never shared.</p>
+      </div>
+
+      <div class="success-msg" id="successMsg">
+        <div class="check">✦</div>
+        <h3>Request Received</h3>
+        <p>Thank you for reaching out. I'll review your request and get back to you within 48 hours to discuss your vision.</p>
+        <br/>
+        <a href="https://instagram.com/YOUR_INSTAGRAM_ID" target="_blank" style="color:var(--gold); font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.2em;">Follow on Instagram →</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">INK & SHADOW</div>
+    <div class="footer-copy">
+      © 2025 INK & SHADOW TATTOO STUDIO<br/>
+      Built by R9CHHOD STUDIOS
+    </div>
+    <div class="footer-social">
+      <a href="https://instagram.com/YOUR_INSTAGRAM_ID" target="_blank" class="social-link" title="Instagram">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="#" class="social-link" title="WhatsApp">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </a>
+      <a href="#" class="social-link" title="Email">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    function submitForm() {
+      const required = ['firstName', 'lastName', 'email', 'style', 'placement', 'description'];
+      let valid = true;
+
+      required.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) {
+          el.style.borderColor = '#8B2020';
+          valid = false;
+          setTimeout(() => el.style.borderColor = '', 2000);
+        }
+      });
+
+      if (!valid) {
+        const first = document.querySelector('[style*="8B2020"]');
+        if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      document.getElementById('formContent').style.opacity = '0';
+      document.getElementById('formContent').style.transition = 'opacity 0.3s';
+      setTimeout(() => {
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('successMsg').classList.add('show');
+      }, 300);
+    }
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Subtle scroll-reveal for sections
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.testimonial-card, .gallery-item, .insta-item').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
